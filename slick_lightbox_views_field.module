@@ -1,0 +1,8 @@
+<?php
+
+function slick_lightbox_views_field_library_info_alter(&$libraries, $extension) {
+  if ($extension === 'slick_lightbox' && $path = slick_lightbox_libraries_get_path('slick-lightbox')) {
+    $libraries['slick-lightbox']['js'] = ['/' . $path . '/dist/slick-lightbox.min.js' => []];
+    $libraries['slick-lightbox']['css']['base'] = ['/' . $path . '/dist/slick-lightbox.css' => []];
+  }
+}

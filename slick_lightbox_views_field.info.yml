@@ -1,0 +1,4 @@
+name: Slick lightbox views field
+description: 'Display fields and custom content in views as slick lightbox'
+type: module
+core_version_requirement: ^8.8 || ^9

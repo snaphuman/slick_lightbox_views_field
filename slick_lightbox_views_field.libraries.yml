@@ -1,0 +1,5 @@
+main:
+  js:
+    assets/js/main.js: {}
+  dependencies:
+    - slick_lightbox/slick_lightbox
