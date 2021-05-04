@@ -177,6 +177,9 @@ class SlickLightboxDisplayField extends FieldPluginBase {
       '#attached' => [
         'library' => [
           'slick_lightbox_views_field/main',
+          'slick_lightbox/load',
+          'slick_lightbox/slick-carousel',
+          'slick/slick.theme',
         ],
       ],
       '#template' => '

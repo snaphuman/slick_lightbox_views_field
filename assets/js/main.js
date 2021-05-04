@@ -5,7 +5,12 @@
 
     const id = $(this).data('id');
 
-    $('#slick-lightbox-' + id).slickLightbox();
+    $('#slick-lightbox-' + id).slickLightbox().on({
+      'hide.slickLightbox': function () {
+        $(this).unslickLightbox();
+      },
+    });
     $('#slick-lightbox-' + id + ' .slide:first-child a').click();
   });
+
 })(jQuery, Drupal, drupalSettings );
