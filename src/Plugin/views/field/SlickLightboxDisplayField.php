@@ -122,14 +122,19 @@ class SlickLightboxDisplayField extends FieldPluginBase {
     $excluded = $this->options['lightbox_inline']['selected_field'];
     $field_id = $this->handlers['field'][$excluded]->field;
     $entity = $values->_entity;
-    $nid = $entity->id();
     $field = $entity->get($field_id);
 
-    $build = [];
+    $options['nid'] = $entity->id();
+    $options['link_text'] = $this->options['lightbox_inline']['link_text'];
+    $options['link_class'] = $this->options['lightbox_inline']['link_class'];
+    $options['link_icon'] = $this->options['lightbox_inline']['link_icon'];
 
     if ($this->typeOf($field) === 'EntityReferenceFieldItemList') {
+
+      //kint("entra slick");
+      $slickBuild = [];
       $referenced = $field->referencedEntities();
-      $type = "reference";
+      $options['type'] = "reference";
 
       foreach ($referenced as $item) {
         if ($this->typeOf($item) === 'Media') {
@@ -146,33 +151,38 @@ class SlickLightboxDisplayField extends FieldPluginBase {
           $formatted = $formatter->getBlazy($element);
 
           // Formatted element is passed to slick array.
-          $build['items'][] = [
+          $slickBuild['items'][] = [
             'slide' => $formatted,
             'caption' => 'To be implemented'
           ];
         }
       }
+      // Slick options
+      // $build['settings']['media_switch'] = 'slick_lightbox';
+      $slickBbuild['options'] = [
+        'arrows' => TRUE,
+      ];
+
+      // Variables that are passed to inline template.
+      $slick = $slick->build($slickBuild);
+
+      $output = $this->slickOutput($options, $slick);
+
+    } elseif ($this->typeOf($field) === 'FieldItemList') {
+      //kint("entra colorbox");
+
+      $view = $field->view();
+      $options['type'] = 'field';
+
+      $output = $this->colorboxOutput($options, $view);
     }
-    else {
 
-      $type = "field";
-      $build['items'][] = ['slide' => ['#markup' => 'http://placehold.it/800x600/ffccff']];
-    }
+    return $output;
+  }
 
-    // Slick options
-    // $build['settings']['media_switch'] = 'slick_lightbox';
-    $build['options'] = [
-      'arrows' => TRUE,
-    ];
+  private function slickOutput($options, $content) {
 
-    // Variables that are passed to inline template.
-    $render_items = $slick->build($build);
-
-    $link_text = $this->options['lightbox_inline']['link_text'];
-    $link_class = $this->options['lightbox_inline']['link_class'];
-    $link_icon = $this->options['lightbox_inline']['link_icon'];
-
-    $output = [
+    return [
       '#type' => 'inline_template',
       '#attached' => [
         'library' => [
@@ -184,24 +194,56 @@ class SlickLightboxDisplayField extends FieldPluginBase {
       ],
       '#template' => '
             <a class="slick-lightbox-btn {{ link_class }}"
-               data-id="{{ id }}" href="#">
-                <i class="{{ link_icon }}"></i>
+               data-id="{{ id }}" data-type="{{ type }}" href="#">
+                {% if link_icon %}
+                  <i class="{{ link_icon }}"></i>
+                {% endif %}
                 {{ link_text }}
             </a>
-            <div id="slick-lightbox-{{ id }}" class="hidden">
+            <div id="slick-lightbox-{{ type }}-{{ id }}" class="hidden">
                 {{ items }}
             </div>
         ',
       '#context' => [
-        'items' => $render_items,
-        'id' => $nid,
-        'link_text' => $link_text,
-        'link_class' => $link_class,
-        'link_icon' => $link_icon,
+        'items' => $content,
+        'id' => $options['nid'],
+        'link_text' => $options['link_text'],
+        'link_class' => $options['link_class'],
+        'link_icon' => $options['link_icon'],
+        'type' => $options['type'],
       ],
     ];
+  }
 
-    return $output;
+  private function colorboxOutput($options, $content) {
+
+    return [
+      '#type' => 'inline_template',
+      '#attached' => [
+        'library' => [
+          'slick_lightbox_views_field/main',
+        ],
+      ],
+      '#template' => '
+            <a data-colorbox-inline="#colorbox-{{ type }}-{{ id }}" class="{{ link_class }}">
+                {% if link_icon %}
+                  <i class="{{ link_icon }}"></i>
+                {% endif %}
+                {{ link_text }}
+            </a>
+            <div id="colorbox-{{ type }}-{{ id }}" class="hidden">
+                {{ items }}
+            </div>
+        ',
+      '#context' => [
+        'items' => $content,
+        'id' => $options['nid'],
+        'link_text' => $options['link_text'],
+        'link_class' => $options['link_class'],
+        'link_icon' => $options['link_icon'],
+        'type' => $options['type'],
+      ],
+    ];
   }
 
   private function typeOf($object) {

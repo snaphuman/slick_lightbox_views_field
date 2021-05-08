@@ -4,13 +4,14 @@
     e.preventDefault();
 
     const id = $(this).data('id');
+    const type = $(this).data('type');
 
-    $('#slick-lightbox-' + id).slickLightbox().on({
+    $('#slick-lightbox-' + type + '-' + id).slickLightbox().on({
       'hide.slickLightbox': function () {
         $(this).unslickLightbox();
       },
     });
-    $('#slick-lightbox-' + id + ' .slide:first-child a').click();
+    $('#slick-lightbox-' + type + '-' + id + ' .slide:first-child a').click();
   });
 
 })(jQuery, Drupal, drupalSettings );
